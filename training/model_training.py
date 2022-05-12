@@ -14,7 +14,9 @@ print(tf.config.list_physical_devices('GPU'))
 
 # Model Name
 model_name = "Final-HybridFusion2-CnnOutput"
-#random.seed(24)
+
+# Seed for Reproduceibility
+random.seed(73)
 
 # Path to data
 data_folder = '/mnt/0A60B2CB60B2BD2F/Datasets/bioreactor_flow_regimes_me/02_data'
@@ -67,7 +69,7 @@ print("Trainings Instanzen:\n-----------------------")
 print("Klasse 0: ", lb_train.count(0), "\nKlasse 1: ", lb_train.count(1), "\nKlasse 2: ", lb_train.count(2))
 
 # Save train-Data-points for later review
-with open('../data/data-points-train.pickle', 'wb') as f:
+with open(f'results/{model_name}/train_data-points/data-points-train.pickle', 'wb') as f:
     pickle.dump(data_points_train, f)
 print("\nSaved Data points for train-review; n=", len(data_points_train))
 
@@ -88,7 +90,7 @@ print("Validierungs Instanzen:\n-----------------------")
 print("Klasse 0: ", lb_val.count(0), "\nKlasse 1: ", lb_val.count(1), "\nKlasse 2: ", lb_val.count(2))
 
 # Save train-Data-points for later review
-with open('../data/data-points-val.pickle', 'wb') as f:
+with open(f'results/{model_name}/train_data-points/data-points-val.pickle', 'wb') as f:
     pickle.dump(data_points_val, f)
 print("\nSaved Data points for val-review; n=", len(data_points_val))
 
@@ -97,7 +99,7 @@ no_test_points = int(split_ratio[2] / sum(split_ratio) * dataset_len)
 data_points_test = shuffled_data_points[no_train_points + no_val_points:]
 
 # Save Data-points for later testing
-with open('../data/data-points-test.pickle', 'wb') as f:
+with open('../testing/data-points-test.pickle', 'wb') as f:
     pickle.dump(data_points_test, f)
 print("\nSaved Data points for testing; n=", len(data_points_test))
 

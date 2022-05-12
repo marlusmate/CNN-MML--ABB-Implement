@@ -14,7 +14,7 @@ model_type = "Final-HybridFusion2-CnnOutput"
 model_path = '../training/results'
 model_name = f'/results/{model_type}/trained_model'
 model_checkpoint_path = f'../training/results/{model_type}' + '/checkpoints/checkpoint-0010.ckpt'
-data_list = '../data/data-points-test.pickle'
+data_list = '../testing/data-points-test.pickle'
 
 # Dataset Parameters
 param_list = ["stirrer_rotational_speed", "gas_flow_rate", "temperature", "fill_level"]
