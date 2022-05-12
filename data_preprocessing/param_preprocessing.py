@@ -2,11 +2,11 @@
 import os
 import random
 import json
-#import numpy as np
+from tensorflow.keras.preprocessing.image import array_to_img
 import pandas as pd
-from data_import.data_import import get_data_points_list, load_json
+from data_import.data_import import get_data_points_list, load_json, read_image, preprocess_image
 from data_import.data_adjust import add_key_content_value, get_exp_date, is_gfl_setpoint, get_flow_regime, get_exp_nr \
-    , set_flow_regime
+    , set_flow_regime, get_gly_value, get_file_usage
 
 """
 This Scripts contains all preprocessing Steps of the Process Data before Training the Model.
@@ -69,19 +69,25 @@ for data_points, target_dir in zip([data_points_test, data_points_train],
                                            key_content="2022-" + exp_date)
         # Exp Number
         exp_nr = get_exp_nr(data_point)
-        file_added = add_key_content_value(file_raw, key_one="experiment", key_two="number",
+        file_added = add_key_content_value(file_added, key_one="experiment", key_two="number",
                                            key_content=exp_nr[-2:])
 
         # Reactor Geometry
 
+        # Substance Properties
+        gly_val = get_gly_value(file_added)
+        file_added = add_key_content_value(file_added, key_one="Substance", key_two="Glycerol",
+                                           key_content=float(gly_val))
 
-
-
+        # In-Use
+        in_use = get_file_usage(file_added)
+        file_added = add_key_content_value(file_added, key_one="in-usage", key_two="File",
+                                           key_content=float(in_use))
 
         # Check for Transition Point, define target path
         gasflow_point = file_added["gas_flow_rate"]["data"]["value"]
         setpoint_bool = is_gfl_setpoint(gasflow_point)
-        if setpoint_bool:
+        if setpoint_bool and in_use == 1:
             proc_gfl = file_added["gas_flow_rate"]["data"]["value"]
             proc_rpm = file_added["stirrer_rotational_speed"]["data"]["value"]
             proc_exp = file_added["experiment"]["number"]["value"]
@@ -104,6 +110,17 @@ for data_points, target_dir in zip([data_points_test, data_points_train],
         # Add Label, according to experiment (Date,) Process Params (and Substance Properties)
         file_labeled = set_flow_regime(file_added, label)
 
+        # Preprocess Image
+        image_raw = read_image(data_point[0])
+        if image_raw is None:
+            continue
+        img_preprocessed = array_to_img(preprocess_image(image_raw, data_point[0]))
+        image_path = os.path.split(file_path)[0] + '/' + img_name
+
         # Save Json to new dir
         with open(file_path, 'w') as fp:
             json.dump(file_labeled, fp, indent=4)
+
+        # Save Image to new dir
+        img_preprocessed.save(image_path)
+

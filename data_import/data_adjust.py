@@ -28,6 +28,38 @@ def get_exp_nr(data_point):
         return exp_nr[0]
 
 
+def get_gly_value(file_raw, map=None):
+    exp_date = file_raw["datetime"]["date"]["value"]
+    if map is None:
+        gly_dict = {"02-08": [0], "02-09": [0], "02-22": [0],
+                      "02-25": [0.187], "03-09": [0.187]}
+    gly_val = gly_dict[exp_date[-5:]]
+
+    return gly_val[0]
+
+
+def get_file_usage(file_raw, exp_log=None):
+    if exp_log is None:
+        exp_log = pd.read_csv("../data_import/experiment_log.csv", delimiter=";")
+        exp_log["Datum"] = [date.replace('_', '-') for date in exp_log["Datum"]]
+    exp_date = file_raw["datetime"]["date"]["value"]
+    exp_nr = file_raw["experiment"]["number"]["value"]
+    exp_gfl = file_raw["gas_flow_rate"]["data"]["value"]
+    exp_rpm = file_raw["stirrer_rotational_speed"]["data"]["value"]
+    in_use = [exp_log["inx[0-use"][exp_log.index[idx]] for idx in np.arange(len(exp_log))
+              if exp_log["Datum"][exp_log.index[idx]] == exp_date[-5:]
+              and exp_log["ExpNr"][exp_log.index[idx]] == 'exp' + exp_nr
+              and exp_log["rpm"][exp_log.index[idx]] == exp_rpm
+              and int(exp_gfl) in np.arange(exp_log["gasflow"][exp_log.index[idx]]-1,
+                                            exp_log["gasflow"][exp_log.index[idx]]+2, 1)]
+    if not len(in_use) == 1 or len(in_use) == 0:
+        print("In Use - Matching with exp_log did not work out")
+        return 3
+    else:
+        usage = in_use[0]
+    return usage
+
+
 def add_key_content_value(json_dict, key_one, key_two, key_content, key_three="value"):
     json_dict.update({key_one: {key_two: {key_three: key_content}}})
 
