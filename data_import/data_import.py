@@ -28,6 +28,32 @@ def get_data_points_list(source_dir, number_points='all'):
         return list(zip(image_file, metadata_file))[0:number_points]
 
 
+def get_exp_data_points_list(source_dir, number_points='all'):
+    """
+    This function iterative over the given folder and look for all data points (image file and metadata file) and
+    returns the list with full file names to those files.
+    :param source_dir: directories where data points are to search
+    :param number_points: specifies whether all data points (use tag 'all') must be or only limited number. The later
+    helps to test the training pipeline with a small amount of data.
+    :return: List of full file names including full paths to files to each data points. MUST be SHUFFLED
+    """
+    image_file = []
+    metadata_file = []
+    for dir in os.listdir(source_dir):
+        for file in os.listdir(source_dir+'/'+dir):
+            if os.path.isfile(source_dir+'/'+dir+'/'+file) and file.endswith('.png'):
+                filename_image = source_dir+'/'+dir+'/'+file
+                filename = os.path.splitext(file)[0][:-13]
+                filename_metadata = source_dir+'/'+dir+'/'+filename+'.json'
+                if os.path.isfile(filename_metadata):
+                    image_file.append(filename_image)
+                    metadata_file.append(filename_metadata)
+    if number_points == 'all':
+        return list(zip(image_file, metadata_file))
+    else:
+        return list(zip(image_file, metadata_file))[0:number_points]
+
+
 def load_json(data_point):
     """
     This loads a json file as a dictionary every time it is called.

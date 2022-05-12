@@ -18,13 +18,13 @@ no_classes = 3
 no_epochs = 1
 
 # Model Name
-model_name = 'Final-HybridFusion2-CnnOutput'
+model_name = 'Test-HybridFusion2-CnnOutput'
 
 # Paths
-data_list = '../data/data-points-test.pickle'
-y_true_list = f'Final-y_true_{model_name}.pickle'
+
 y_true_list = 'labels.pickle'
-y_pred_list = f'predictions/Final-y_pred_{model_name}.pickle'
+y_pred_list = f'predictions/y_pred_{model_name}.pickle'
+
 
 # Load Predictions, True Labels
 with open(y_pred_list, 'rb') as f:
@@ -32,10 +32,13 @@ with open(y_pred_list, 'rb') as f:
 
 with open(y_true_list, 'rb') as f:
     label = pickle.load(f)
+    print("Test-Verteilung:\n", "0:", label.count(0),"\n1:", label.count(1),"\n2:", label.count(2))
 
-#pred_finaloutput_sparse = pred[0]
-#pred_earlyfusion_sparse = pred[1]
-pred = pred[0]
+
+if len(pred[0]) == 1:
+    pred = pred
+else:
+    pred = pred[0]
 
 one_hot_encoder = tf.one_hot(range(no_classes), no_classes)
 label_sparse = np.asarray([one_hot_encoder[lb].numpy() for lb in label])
@@ -62,7 +65,7 @@ fig, px = plt.subplots(figsize=(7.5, 7.5))
 px.matshow(cf_mat.numpy(), cmap=plt.cm.Blues, alpha=0.5)
 for m in range(cf_mat.shape[0]):
     for n in range(cf_mat.shape[1]):
-        px.text(x=m,y=n,s=cf_mat.numpy()[m, n], va='center', ha='center', size='xx-large')
+        px.text(x=m,y=n,s=cf_mat.numpy()[n, m], va='center', ha='center', size='xx-large')
 # Sets the labels
 plt.xticks(ticks=np.arange(no_classes), labels=['flooded', 'loaded', 'dispersed'],fontsize='large', rotation=30)
 plt.yticks(ticks=np.arange(no_classes), labels=['flooded', 'loaded', 'dispersed'],fontsize='large')
@@ -208,7 +211,7 @@ metrics = {'precision_0': precision_0.result().numpy().astype('float64'), 'preci
 
 
 
-with open(f'Final-metrics_{model_name}.json', 'w', encoding="utf8") as f: json.dump(metrics, f)
+with open(f'metrics/metrics_{model_name}.json', 'w', encoding="utf8") as f: json.dump(metrics, f)
 
 
 

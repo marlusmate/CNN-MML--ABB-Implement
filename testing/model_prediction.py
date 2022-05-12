@@ -8,7 +8,7 @@ from data_import.data_import import data_generator
 
 
 # Model Name
-model_type = "Final-HybridFusion2-CnnOutput"
+model_type = "Test-HybridFusion2-CnnOutput"
 
 # Paths
 model_path = '../training/results'
@@ -59,10 +59,10 @@ model.summary()
 
 # Save Predictions
 pred = model.predict(dataset_test_batched, batch_size=batch_size)
-with open(f"Final-y_pred_{model_type}.pickle", 'wb') as f:
+with open(f"predictions/y_pred_{model_type}.pickle", 'wb') as f:
     pickle.dump(pred, f)
-with open(f"Final-y_true_{model_type}.pickle", 'wb') as f:
+with open(f"labels.pickle", 'wb') as f:
     pickle.dump(lb_test, f)
 
-print("Vorhersagen(", len(pred), ") abgespeichert - y_pred.json")
+print("Vorhersagen(", len(pred), f") abgespeichert - y_pred_{model_type}.pickle")
 

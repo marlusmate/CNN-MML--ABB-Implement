@@ -44,6 +44,9 @@ def get_file_usage(file_raw, exp_log=None):
         exp_log["Datum"] = [date.replace('_', '-') for date in exp_log["Datum"]]
     exp_date = file_raw["datetime"]["date"]["value"]
     exp_nr = file_raw["experiment"]["number"]["value"]
+    if "value" not in file_raw["gas_flow_rate"]["data"].keys():
+        print("in-use=3, no Gasflow recorded")
+        return 3
     exp_gfl = file_raw["gas_flow_rate"]["data"]["value"]
     exp_rpm = file_raw["stirrer_rotational_speed"]["data"]["value"]
     in_use = [exp_log["inx[0-use"][exp_log.index[idx]] for idx in np.arange(len(exp_log))
@@ -53,10 +56,11 @@ def get_file_usage(file_raw, exp_log=None):
               and int(exp_gfl) in np.arange(exp_log["gasflow"][exp_log.index[idx]]-1,
                                             exp_log["gasflow"][exp_log.index[idx]]+2, 1)]
     if not len(in_use) == 1 or len(in_use) == 0:
-        print("In Use - Matching with exp_log did not work out")
-        return 3
+        print("in-use=4 - Matching with exp_log did not work out")
+        return 4
     else:
         usage = in_use[0]
+        print("in-use:", usage)
     return usage
 
 

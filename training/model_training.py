@@ -9,17 +9,17 @@ import pickle
 from data_import.data_import import get_data_points_list, data_generator
 
 # Disable CUDA devices
-#os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 print(tf.config.list_physical_devices('GPU'))
 
 # Model Name
-model_name = "Final-HybridFusion2-CnnOutput"
+model_name = "Test-HybridFusion2-CnnOutput"
 
-# Seed for Reproduceibility
+# Seed for Reproducebility
 random.seed(73)
 
 # Path to data
-data_folder = '/mnt/0A60B2CB60B2BD2F/Datasets/bioreactor_flow_regimes_me/02_data'
+data_folder = 'C:/Users/Markus Esser/mml-data/example_pictures-train'
 
 # Path to where save model
 checkpoint_path = f'./results/{model_name}/checkpoints/' + '/checkpoint-{epoch:04d}.ckpt'
@@ -35,8 +35,8 @@ output_proc_shape = (len(param_list),)
 output_img_shape = (128, 128, 1)
 
 # Training hyper parameters
-no_epochs = 51
-batch_size = 31
+no_epochs = 3
+batch_size = 1
 init_lr = 0.001
 
 # Get list of data points
@@ -56,7 +56,7 @@ output_signature = ((tf.TensorSpec(shape=output_img_shape, dtype=tf.float32),
 no_train_points = int(split_ratio[0] / sum(split_ratio) * dataset_len)
 data_points_train = shuffled_data_points[:no_train_points]
 
-data_gen_train = data_generator(data_points_train, no_epochs, no_classes, output_img_shape, param_list)
+data_gen_train = data_generator(data_points_train, no_epochs, no_classes, param_list)
 dataset_train = tf.data.Dataset.from_generator(lambda: data_gen_train, output_signature=output_signature)
 dataset_train_batched = dataset_train.batch(batch_size)
 
@@ -77,7 +77,7 @@ print("\nSaved Data points for train-review; n=", len(data_points_train))
 no_val_points = int(split_ratio[1] / sum(split_ratio) * dataset_len)
 data_points_val = shuffled_data_points[no_train_points:no_train_points + no_val_points]
 
-data_gen_val = data_generator(data_points_train, no_epochs, no_classes, output_img_shape, param_list)
+data_gen_val = data_generator(data_points_train, no_epochs, no_classes, param_list)
 dataset_val = tf.data.Dataset.from_generator(lambda: data_gen_val, output_signature=output_signature)
 dataset_val_batched = dataset_val.batch(batch_size)
 

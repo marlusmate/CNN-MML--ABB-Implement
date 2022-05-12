@@ -9,7 +9,7 @@ from grad_cam import make_gradcam_heatmap, save_and_display_gradcam
 # Adapted from https://keras.io/examples/vision/grad_cam/
 
 # Model Name
-model_name = 'Final-HybridFusion2-CnnOutput'
+model_name = 'Test-HybridFusion2-CnnOutput'
 
 # Paths
 source_dir = 'C:/Users/Markus Esser/PycharmProjects/MML-Beleg/data/example_pictures'
