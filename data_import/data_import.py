@@ -126,10 +126,12 @@ def preprocess_image(image_file, name_file, output_image_shape=(128, 128, 1), cr
                                                       crop_points[3])
     else:
         image_cropped = image_grayscaled
+    print("Shape image_cropped: ", image_cropped.shape, "; Type: ", type(image_cropped))
 
     # Resize
     final_image_size = list(output_image_shape)[0:2]
     image_resized = tf.image.resize(image_cropped, final_image_size, method='bicubic')
+    print("Shape image_resized: ", image_resized.shape, "; Type: ", type(image_resized))
 
     # Normalize Image
     image_normed = tf.math.divide(image_resized,

@@ -62,13 +62,20 @@ for data_points, target_dir in zip([data_points_test, data_points_train],
         file_raw = load_json(file_source)
 
         # Add Date, [Camera Position, Reactor Geometry, Substance Properties (Glycerol Share), Exp_nr, In Use]
+
+        # Date
         exp_date = get_exp_date(data_point)
         file_added = add_key_content_value(file_raw, key_one="datetime", key_two="date",
                                            key_content="2022-" + exp_date)
-
+        # Exp Number
         exp_nr = get_exp_nr(data_point)
         file_added = add_key_content_value(file_raw, key_one="experiment", key_two="number",
                                            key_content=exp_nr[-2:])
+
+        # Reactor Geometry
+
+
+
 
 
         # Check for Transition Point, define target path
