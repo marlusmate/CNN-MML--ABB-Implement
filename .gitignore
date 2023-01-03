@@ -1,5 +1,6 @@
 /training/results/
 /models/
 /results/
+/training/__pycache/
 /results/checkpoints
 /results/tensorboard
