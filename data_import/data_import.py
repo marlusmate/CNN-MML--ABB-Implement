@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+import tensorflow_addons as tfa
 import json
 
 
@@ -17,7 +18,7 @@ def get_data_points_list(source_dir, number_points='all'):
     for file in os.listdir(source_dir):
         if os.path.isfile(os.path.join(source_dir, file)) and file.endswith('.png'):
             filename_image = os.path.join(source_dir, file)
-            filename = os.path.splitext(file)[0][:-13]
+            filename = os.path.splitext(file)[0]
             filename_metadata = os.path.join(source_dir, filename + '.json')
             if os.path.isfile(filename_metadata):
                 image_file.append(filename_image)
@@ -79,11 +80,11 @@ def read_json(data_point, param_list=None):
     """
     json_content = load_json(data_point)
     if param_list is None:
-        param_list = ["stirrer_rotational_speed", "gas_flow_rate", "temperature", "fill_level"]
-    if not all(["value" in json_content[param]["data"] for param in param_list]):
+        param_list = ["rpm", "flow_rate", "temperature", "weight"]
+    if not all([json_content[param] is not None for param in param_list]):
         return None
 
-    params = [json_content[param]["data"]["value"] for param in param_list]
+    params = [json_content[param] for param in param_list]
 
     return params
 
@@ -113,12 +114,12 @@ def read_label(file, no_classes):
     one_hot_encoder = tf.one_hot(range(no_classes), no_classes)
     with open(file) as f:
         json_content = json.load(f)
-        label_int = json_content["flow_regime"]["data"]["value"]
+        label_int = int(json_content["flow_regime"])
         label = one_hot_encoder[label_int]
         return label
 
 
-def preprocess_image(image_file, name_file, output_image_shape=(128, 128, 1), cropping=True, crop_box=None):
+def preprocess_image(image_file, name_file=None, output_image_shape=(128, 128, 1), cropping=False, crop_box=[280, 272, 1768, 424]):
     """
     This functions contains all preprocess steps of the image data. Including: Grayscale Conversion, Cropping,
     Resize and Normalization.
@@ -135,12 +136,14 @@ def preprocess_image(image_file, name_file, output_image_shape=(128, 128, 1), cr
         image_grayscaled = tf.image.rgb_to_grayscale(image_file)
     else:
         image_grayscaled = image_file
-    print("Shape image_grayscaled: ", image_grayscaled.shape, "; Type: ", type(image_grayscaled))
+    #print("Shape image_grayscaled: ", image_grayscaled.shape, "; Type: ", type(image_grayscaled))
+
+    #image_grayscaled = tfa.image.rotate(image_grayscaled, 270)
 
     # Crop Box, Size
     if cropping is True:
         if crop_box is None:
-            crop_matrix = {"02-08": [400, 0, 1165, 2447], "02-09": [225, 0, 1481, 2447], "02-22": [440, 0, 1162, 2447],
+            crop_matrix = {"02-08": [400, 0, 1165, 2447], "02-09": [225, 0, 1481, 2447], "02-22": [280, 0, 1162, 2447],
                            "02-25": [455, 0, 1149, 2447], "03-09": [370, 0, 1310, 2447]}
             exp_date = [date for date in crop_matrix.keys() if date in name_file]
             crop_points = crop_matrix[exp_date[0]]
@@ -152,12 +155,12 @@ def preprocess_image(image_file, name_file, output_image_shape=(128, 128, 1), cr
                                                       crop_points[3])
     else:
         image_cropped = image_grayscaled
-    print("Shape image_cropped: ", image_cropped.shape, "; Type: ", type(image_cropped))
+    #print("Shape image_cropped: ", image_cropped.shape, "; Type: ", type(image_cropped))
 
     # Resize
     final_image_size = list(output_image_shape)[0:2]
     image_resized = tf.image.resize(image_cropped, final_image_size, method='bicubic')
-    print("Shape image_resized: ", image_resized.shape, "; Type: ", type(image_resized))
+    #print("Shape image_resized: ", image_resized.shape, "; Type: ", type(image_resized))
 
     # Normalize Image
     image_normed = tf.math.divide(image_resized,
@@ -181,8 +184,9 @@ def data_generator(list_data_points, repeats, no_classes, param_list=None):
             image_file = data_point[0]
             label_file = data_point[1]
 
-            image_preprocessed = read_image(image_file)
+            image= read_image(image_file)
             params_preprocessed = read_json(label_file, param_list=param_list)  # actually not preprocessed, just loaded
+            image_preprocessed = preprocess_image(image)
 
             if image_preprocessed is None:
                 print("Parameter File ", label_file, "missing, skipping data point")

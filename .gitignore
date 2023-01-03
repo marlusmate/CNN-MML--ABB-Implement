@@ -1,1 +1,4 @@
 /training/results/
+/models/
+/results/checkpoints
+/results/tensorboard
